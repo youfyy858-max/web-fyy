@@ -1,0 +1,229 @@
+<!doctype html>
+
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment — DANA / QRIS / GOPAY</title>
+  <meta name="description" content="Halaman pembayaran DANA, QRIS, GoPay — copy nomor, lihat QR, download, tampilan HD & smooth" />
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1020; --accent:#06b6d4; --glass: rgba(255,255,255,0.03);
+      --text:#e6eef8; --muted:#a6b3c6; --success:#34d399;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg, #071028 0%, #071c2a 60%); color:var(--text); -webkit-font-smoothing:antialiased;
+      display:flex; align-items:center; justify-content:center; padding:32px;
+    }
+    .wrap{width:100%;max-width:980px}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:#031022;box-shadow:0 6px 18px rgba(3,16,34,0.6)}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted)}.grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:14px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(8px);border:1px solid rgba(255,255,255,0.03)}
+
+.pay-list{display:flex;flex-direction:column;gap:12px}
+.pay-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--glass);transition:transform .18s cubic-bezier(.2,.9,.3,1), box-shadow .18s;}
+.pay-item:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(6,182,212,0.08)}
+.icon{width:64px;height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.meta{flex:1}
+.meta h3{margin:0 0 6px 0;font-size:16px}
+.meta p{margin:0;color:var(--muted);font-size:14px}
+.actions{display:flex;gap:8px;align-items:center}
+.btn{appearance:none;border:0;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.05);color:var(--text);cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04)}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#8b5cf6);color:#021226}
+
+.qbox{display:flex;flex-direction:column;gap:12px;align-items:center}
+.qr{width:320px;height:320px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;padding:14px}
+.qr img{max-width:100%;height:auto;border-radius:6px}
+.small{font-size:13px;color:var(--muted)}
+
+.copy-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.num{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);padding:10px 12px;border-radius:10px;display:inline-block}
+
+.footer{margin-top:16px;color:var(--muted);font-size:13px;text-align:center}
+
+/* responsive */
+@media(max-width:880px){
+  .grid{grid-template-columns:1fr;}
+  .qr{width:260px;height:260px}
+}
+
+/* smooth utilities */
+.fade-in{animation:fadeIn .6s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo">PAY</div>
+      <div>
+        <h1>Halaman Pembayaran — DANA · QRIS · GOPAY</h1>
+        <p class="lead">Tampilan HD, smooth transitions. Klik tombol untuk menyalin nomor atau buka QR untuk memperbesar / download.</p>
+      </div>
+    </div><div class="grid">
+  <div class="card fade-in">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <strong>Metode Pembayaran</strong>
+      <span class="small">Siap pakai — sesuaikan jika perlu</span>
+    </div>
+
+    <div class="pay-list">
+      <!-- DANA -->
+      <div class="pay-item" id="dana-item">
+        <div class="icon" style="background:linear-gradient(135deg,#06b6d4,#0ea5a5);color:#021226">D</div>
+        <div class="meta">
+          <h3>DANA</h3>
+          <p>Nomor / ID penerima</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="copyText('085876476089')">Salin</button>
+          <button class="btn ghost" onclick="openQR('DANA:085876476089')">Lihat QR</button>
+        </div>
+      </div>
+
+      <!-- QRIS -->
+      <div class="pay-item" id="qris-item">
+        <div class="icon" style="background:linear-gradient(135deg,#f97316,#f43f5e);color:#021226">Q</div>
+        <div class="meta">
+          <h3>QRIS</h3>
+          <p>QRIS standar — isi payload QRIS merchant jika ada</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="copyText('QRIS_PAYLOAD')">Salin Payload</button>
+          <button class="btn ghost" onclick="openQR('QRIS:QRIS_PAYLOAD')">Lihat QR</button>
+        </div>
+      </div>
+
+      <!-- GoPay -->
+      <div class="pay-item" id="gopay-item">
+        <div class="icon" style="background:linear-gradient(135deg,#34d399,#06b6d4);color:#021226">G</div>
+        <div class="meta">
+          <h3>GoPay</h3>
+          <p>Nomor / ID GoPay (tanpa +)</p>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="copyText('6285876476089')">Salin</button>
+          <button class="btn ghost" onclick="openQR('GOPAY:6285876476089')">Lihat QR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">Nomor yang disediakan: DANA: <span class="num">085876476089</span> · GoPay: <span class="num">6285876476089</span></div>
+  </div>
+
+  <div class="card fade-in">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong>Pratinjau QR & Aksi</strong>
+      <div class="small">Klik gambar untuk memperbesar, atau download</div>
+    </div>
+
+    <div class="qbox" style="margin-top:12px">
+      <div class="qr" id="qrPreview">
+        <!-- default QR will load here -->
+        <img id="qrImage" src="https://chart.googleapis.com/chart?cht=qr&chs=320x320&chl=DANA:085876476089" alt="QR" />
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center">
+        <button class="btn primary" onclick="downloadQR()">Download QR</button>
+        <button class="btn ghost" onclick="enlargeQR()">Perbesar</button>
+        <button class="btn" onclick="resetPreview()">Reset</button>
+      </div>
+
+      <div class="small">Preview QR saat ini menunjukkan data yang digunakan untuk membentuk QR (nomor atau payload). Pastikan payload QRIS sesuai standar bila digunakan untuk merchant.</div>
+    </div>
+  </div>
+</div>
+
+  </div>  <!-- modal for enlarge -->  <div id="modal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:40">
+    <div style="width:min(720px,92%);background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:18px;border-radius:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <strong>QR — Perbesar</strong>
+        <button class="btn ghost" onclick="closeModal()">Tutup</button>
+      </div>
+      <div style="display:flex;justify-content:center">
+        <img id="modalImg" src="" alt="QR large" style="max-width:100%;height:auto;border-radius:8px;background:#fff;padding:8px" />
+      </div>
+    </div>
+  </div>  <script>
+    // --- default data from user ---
+    const DATA = {
+      dana: '085876476089',
+      gopay: '6285876476089',
+      qris: 'QRIS_PAYLOAD'
+    };
+
+    // helper: copy text
+    async function copyText(txt){
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast('Tersalin: ' + txt);
+        // also update preview
+        document.getElementById('qrImage').src = qrURL(txt);
+      }catch(e){
+        prompt('Salin manual, teks berikut:', txt);
+      }
+    }
+
+    function qrURL(payload){
+      const encoded = encodeURIComponent(payload);
+      // use Google Chart API to render QR in-browser
+      return `https://chart.googleapis.com/chart?cht=qr&chs=320x320&chl=${encoded}`;
+    }
+
+    function openQR(payload){
+      document.getElementById('qrImage').src = qrURL(payload);
+      toast('Preview QR diupdate');
+    }
+
+    function resetPreview(){
+      document.getElementById('qrImage').src = qrURL('DANA:' + DATA.dana);
+      toast('Kembali ke DANA');
+    }
+
+    function enlargeQR(){
+      const src = document.getElementById('qrImage').src;
+      document.getElementById('modalImg').src = src;
+      document.getElementById('modal').style.display = 'flex';
+    }
+    function closeModal(){document.getElementById('modal').style.display = 'none'}
+
+    function downloadQR(){
+      const src = document.getElementById('qrImage').src;
+      // create an anchor to download
+      const a = document.createElement('a');
+      a.href = src;
+      a.download = 'qrcode.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast('Download dimulai (atau buka gambar dan simpan jika diblokir)');
+    }
+
+    // small toast implementation
+    function toast(msg){
+      const el = document.createElement('div');
+      el.textContent = msg;
+      Object.assign(el.style,{position:'fixed',right:'20px',bottom:'20px',background:'rgba(2,6,23,0.85)',color:'#fff',padding:'10px 14px',borderRadius:'10px',boxShadow:'0 10px 30px rgba(2,6,23,0.6)',zIndex:60});
+      document.body.appendChild(el);
+      setTimeout(()=>el.style.opacity='0',2200);
+      setTimeout(()=>el.remove(),2700);
+    }
+
+    // click QR preview to enlarge
+    document.getElementById('qrImage').addEventListener('click',enlargeQR);
+
+    // initialize preview with DANA
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.getElementById('qrImage').src = qrURL('DANA:' + DATA.dana);
+    });
+
+  </script></body>
+</html>
